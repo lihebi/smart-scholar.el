@@ -1,0 +1,34 @@
+#+TITLE: smart-scholar.el
+Smart Scholar for Emacs
+
+* Introduction
+
+** Related work
+
+* Feature
+** support major CS conferences
+
+- [ ] NIPS
+- [ ] ICML
+- [ ] CVPR
+- [ ] ICCV
+- [ ] PLDI
+- [ ] POPL
+- [ ] SOSP
+- [ ] OSDI
+
+For each of them, the package will manage
+- crawl the website for a bib file list, for each year
+- for each bib entry, figure out what is the pdf link
+- download pdfs automatically, in background
+- do all these at once
+
+Also, I noticed that downloading htmls and pdfs from publishers
+website is likely to be very slow, due to the visit limit of the
+publishers. Thus, I might want to store a git mirror of all webpages
+of these conferences. There might be copyright issues, but I think for
+webpages that is fine.
+
+The pdf cannot be mirrored: they are too large and has copyright
+concern.
+
