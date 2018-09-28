@@ -2,18 +2,51 @@
 Smart Scholar for Emacs
 
 * Introduction
+** Installation
+I haven't have chance to look into Melpa, so currently you are going
+to install from GitHub. You can do this easily with
+[[https://github.com/raxod502/straight.el][striaght.el]]. Basically,
+you will need to do:
+
+#+BEGIN_SRC elisp
+(use-package smart-scholar
+  :straight (smart-scholar :type git :host github
+                           :repo "lihebi/smart-scholar.el"))
+#+END_SRC
 
 ** Related work
+- https://github.com/cute-jumper/gscholar-bibtex: Retrieve BibTeX
+  entries from Google Scholar, ACM Digital Library, IEEE Xplore and
+  DBLP. Might be useful for this project.
+- https://www.zotero.org/: something like Mendeley. Open-source, in
+  JS. Managed by some organization.
+- Mendeley
+- https://github.com/forrestbao/autoscholar: personal summarization
+
 
 * Feature
 ** support major CS conferences
 
+AI conferences
 - [ ] NIPS
 - [ ] ICML
+- [ ] ICLR
+
+Image Processing
 - [ ] CVPR
 - [ ] ICCV
+- [ ] ECCV
+
+NLP:
+- [ ] ACL
+- [ ] NAACL
+- [ ] EMNLP
+
+Programming Language:
 - [ ] PLDI
 - [ ] POPL
+
+System:
 - [ ] SOSP
 - [ ] OSDI
 
