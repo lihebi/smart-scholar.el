@@ -1,7 +1,5 @@
 ;; Download from conference's website
 
-(defcustom smart-scholar-html-dir "~/tmp/html"
-  "Default directory for storing downloaded htmls.")
 
 (defun thecvf-html-url (year conf)
   (let* ((url (concat "http://openaccess.thecvf.com/" conf
@@ -51,6 +49,8 @@
            do (download-conf-html!
                (iccv-html-url year)
                (smart-scholar-local-path year "ICCV"))))
+
+
 
 ;; (download-all-cvpr)
 ;; (download-all-iccv)
