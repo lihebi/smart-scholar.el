@@ -25,6 +25,14 @@ you will need to do:
 
 
 * Feature
+
+** Implementation
+*** download html
+*** generate bib from html
+*** load/unload bib
+
+*** download pdf
+
 ** support major CS conferences
 
 AI conferences

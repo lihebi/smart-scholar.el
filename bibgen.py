@@ -9,6 +9,10 @@ import json
 import argparse
 import itertools
 
+##############################
+## Utility functions
+##############################
+
 stop_words = set(["you", "the", "and", "can", "where", "when", "how",
                   "what", "who", "why", "does", "for", "are", "don",
                   "from"])
@@ -20,6 +24,12 @@ def title_first_word(title):
     lst = list(filter(lambda s: s not in stop_words, lst))
     return lst[0].title() if lst else 'Title'
 
+
+def gen_id(year, conf, authors, title):
+    return '-'.join([year, conf, authors[0].split(' ')[-1], title_first_word(title)])
+
+def authors_str2lst(str):
+    return list(map(lambda s: s.strip(), re.split(r',|;|\*| and ', str)))
 
 def clean_string(str):
     return str.replace('\n', ' ').replace('  ', ' ').strip()
@@ -38,6 +48,84 @@ def path2year(path):
 
 def path2conf(filename):
     return re.search('/(\w+)-\d{4}', filename)[1]
+
+##############################
+## HTML download for ML
+##
+## because we need to parse the file to get the link
+##############################
+
+def download_html_ml():
+    url = 'https://link.springer.com/journal/volumesAndIssues/10994'
+    # download this index
+    # parse for all issues
+    # download html for each issues
+    r = requests.get(url)
+    with open('test.html', 'wb') as f:
+        f.write(r.content)
+    with open('test.html') as f:
+        soup = BeautifulSoup(f, 'lxml')
+        issues = [('https://link.springer.com' + issue.a['href'],
+                   re.search('([0-9]{4}), Issue',
+                             issue.get_text().strip())
+                   .groups()[0])
+                  for issue in soup.select('.issue-item')]
+        for year, items in itertools.groupby(reversed(issues),
+                                             lambda x: x[1]):
+            for idx, (url, _) in enumerate(items, start=1):
+                # print(url)
+                download_file(url, './html/ML/ML-' + year + '-' + str(idx) + '.html')
+
+
+def download_file(url, filename):
+    print('downloading ' + url + ' into ' + filename + ' ..')
+    if os.path.exists(filename):
+        print('exists. Skip')
+    else:
+        r = requests.get(url)
+        with open(filename, 'wb') as f:
+            f.write(r.content)
+        print('sleeping 5 sec ..')
+        time.sleep(5)
+
+
+##############################
+## Download pdf
+##############################
+
+def download_pdf(url, filename):
+    print('downloading to ' + filename + ' ..')
+    r = requests.get(url)
+    with open(filename, 'wb') as f:
+        f.write(r.content)
+                
+
+def download_bib_pdfs(bib_file):
+    ids = []
+    urls = []
+    conf = path2conf(bib_file)
+    outdir = './pdf/auto/' + conf
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    with open(bib_file) as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('@'):
+                ids.append(line[line.find('{')+1:-1])
+            elif line.startswith('pdflink'):
+                urls.append(line[line.find('{')+1:-1])
+            else:
+                pass
+    for id, url in zip(ids, urls):
+        filename = os.path.join(outdir, id + '.pdf')
+        download_pdf(url, filename)
+        print('sleeping 7 sec ..')
+        time.sleep(7)
+
+        
+##############################
+## Gen bib by conference
+##############################
 
 def gen_aaai_bib(html_file):
     AAAI_pdf_prefix = 'https://aaai.org/Papers/AAAI/'
@@ -79,16 +167,6 @@ def gen_aaai_bib(html_file):
                                           year, "AAAI")
     return res
 
-if __name__ == '__hebi__':
-    gen_aaai_bib('./html/AAAI/AAAI-2018.html')
-    for year in range(2010, 2019):
-        print(year)
-        bib = gen_aaai_bib('./html/AAAI/AAAI-' + str(year) + '.html')
-        with open('./bib/auto/AAAI/AAAI-' + str(year) + '.bib', 'w') as f:
-            f.write(bib)
-        
-
-
 def gen_nips_bib(html_file):
     # https://papers.nips.cc/book/advances-in-neural-information-processing-systems-30-2017
     # https://papers.nips.cc/paper/6606-wider-and-deeper-cheaper-and-faster-tensorized-lstms-for-sequence-learning
@@ -112,69 +190,6 @@ def gen_nips_bib(html_file):
     return res
 
 
-def gen_aaai_all():
-    gen_all('./bib/auto/AAAI',
-            './html/AAAI',
-            gen_aaai_bib)
-
-    
-def gen_nips_all():
-    gen_all('./bib/auto/NIPS',
-            './html/NIPS',
-            gen_nips_bib)
-
-def gen_acml_all():
-    gen_all('./bib/auto/ACML',
-            './html/ACML',
-            gen_mlr_bib)
-
-def gen_colt_all():
-    gen_all('./bib/auto/COLT',
-            './html/COLT',
-            gen_mlr_bib)
-
-def gen_aistats_all():
-    gen_all('./bib/auto/AISTATS',
-            './html/AISTATS',
-            gen_mlr_bib)
-    
-def gen_all(outdir, htmldir, gen_bib_func):
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    for root, dirs, files in os.walk(htmldir):
-        for f in files:
-            p = os.path.join(root, f)
-            print(p)
-            outfile = os.path.join(outdir, p[p.rfind('/')+1:p.rfind('.')]+'.bib')
-            with open(outfile, 'w') as f:
-                f.write(gen_bib_func(p))
-                pass
-            pass
-        pass
-    pass
-
-
-def gen_all_by_year(conf, years, gen_bib_func):
-    outdir = './bib/auto/' + conf
-    htmldir = './html/' + conf
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    for root, dirs, files in os.walk(htmldir):
-        for f in files:
-            p = os.path.join(root, f)
-            year = int(path2year(p))
-            if p.endswith('.html') and year in years:
-                print(p)
-                outfile = os.path.join(outdir, p[p.rfind('/')+1:p.rfind('.')]+'.bib')
-                with open(outfile, 'w') as f:
-                    f.write(gen_bib_func(p))
-                    pass
-                pass
-            pass
-        pass
-    pass
-
-
 def gen_mlr_bib(html_file):
     # ACML
     # COLT
@@ -193,13 +208,6 @@ def gen_mlr_bib(html_file):
             res += gen_single_bib(id, title, ' and '.join(authors), pdflink,
                                   year, conf)
     return res
-
-def gen_id(year, conf, authors, title):
-    return '-'.join([year, conf, authors[0].split(' ')[-1], title_first_word(title)])
-
-def authors_str2lst(str):
-    return list(map(lambda s: s.strip(), re.split(r',|;|\*| and ', str)))
-
 
 def gen_ijcai_bib(html_file):
     year = path2year(html_file)
@@ -281,11 +289,6 @@ def gen_ijcai_bib(html_file):
                                           year, "IJCAI")
     return res
 
-if __name__ == '__hebi__':
-    soup = BeautifulSoup(open('./html/IJCAI/IJCAI-2011.html'), 'lxml')
-    len(soup.select('.content .field-item > p'))
-    print(gen_ijcai_bib('./html/IJCAI/IJCAI-2017.html'))
-    
 def gen_ijcai_all():
     outdir = './bib/auto/IJCAI'
     htmldir = './html/IJCAI'
@@ -301,8 +304,6 @@ def gen_ijcai_all():
                 outfile = os.path.join(outdir, p[p.rfind('/')+1:p.rfind('.')]+'.bib')
                 with open(outfile, 'w') as f:
                     f.write(gen_ijcai_bib(p))
-
-
 
 
 def uai_pdflink(proceeding_id, paper_id):
@@ -401,9 +402,6 @@ def gen_uai_bib_2015(html_file):
                 id = gen_id(year, 'UAI', authors, title)
                 res += gen_single_bib(id, title, ' and '.join(authors), pdflink,
                                       year, "UAI")
-                pass
-            pass
-        pass
     return res
 
 def gen_uai_bib_2016(html_file):
@@ -463,40 +461,6 @@ if __name__ == '__hebi__':
     s = BeautifulSoup(open('./html/UAI/UAI-2017.html'))
     s.select('td')[1]
 
-
-
-def download_pdf(url, filename):
-    print('downloading to ' + filename + ' ..')
-    r = requests.get(url)
-    with open(filename, 'wb') as f:
-        f.write(r.content)
-                
-
-def download_bib_pdfs(bib_file):
-    ids = []
-    urls = []
-    conf = path2conf(bib_file)
-    outdir = './pdf/auto/' + conf
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    with open(bib_file) as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith('@'):
-                ids.append(line[line.find('{')+1:-1])
-            elif line.startswith('pdflink'):
-                urls.append(line[line.find('{')+1:-1])
-            else:
-                pass
-            pass
-        pass
-    for id, url in zip(ids, urls):
-        filename = os.path.join(outdir, id + '.pdf')
-        download_pdf(url, filename)
-        print('sleeping 7 sec ..')
-        time.sleep(7)
-        pass
-    pass
 
 def gen_uai_all():
     gen_all('./bib/auto/UAI',
@@ -613,38 +577,6 @@ def gen_jmlr_all():
             gen_jmlr_bib)
 
 
-def download_html_ml():
-    url = 'https://link.springer.com/journal/volumesAndIssues/10994'
-    # download this index
-    # parse for all issues
-    # download html for each issues
-    r = requests.get(url)
-    with open('test.html', 'wb') as f:
-        f.write(r.content)
-    with open('test.html') as f:
-        soup = BeautifulSoup(f, 'lxml')
-        issues = [('https://link.springer.com' + issue.a['href'],
-                   re.search('([0-9]{4}), Issue',
-                             issue.get_text().strip())
-                   .groups()[0])
-                  for issue in soup.select('.issue-item')]
-        for year, items in itertools.groupby(reversed(issues),
-                                             lambda x: x[1]):
-            for idx, (url, _) in enumerate(items, start=1):
-                # print(url)
-                download_file(url, './html/ML/ML-' + year + '-' + str(idx) + '.html')
-
-
-def download_file(url, filename):
-    print('downloading ' + url + ' into ' + filename + ' ..')
-    if os.path.exists(filename):
-        print('exists. Skip')
-    else:
-        r = requests.get(url)
-        with open(filename, 'wb') as f:
-            f.write(r.content)
-        print('sleeping 5 sec ..')
-        time.sleep(5)
 
 
 def gen_ml_bib(html_file):
@@ -686,9 +618,128 @@ def gen_ml_bib_all():
         print(bib_file)
         with open(bib_file, 'w') as f:
             f.write(bib)
+
+def gen_cvpr_bib(html_file):
+    "Generate CVPR bib as string from html"
+    year = path2year(html_file)
+    res = "\n"
+    with open(html_file) as f:
+        soup = BeautifulSoup(f, 'html.parser')
+        for paper in soup.select('.ptitle'):
+            title = paper.a.get_text()
+            dd = paper.find_next_sibling('dd')
+            authors = [a.get_text() for a in dd.select('a')]
+            dd = dd.find_next_sibling('dd')
+            ahref = list(filter(lambda x: 'pdf' in x.get_text().strip(),
+                                dd.select('a')))[0]
+            pdflink = 'http://openaccess.thecvf.com/' + ahref['href']
+            id = gen_id(year, 'CVPR', authors, title)
+            res += gen_single_bib(id, title, ' and '.join(authors), pdflink,
+                                  year, "CVPR")
+    return res
+
+def gen_iccv_bib(html_file):
+    # TODO this is the same as above, refactor it
+    "Generate ICCV bib as string from html"
+    year = path2year(html_file)
+    res = "\n"
+    with open(html_file) as f:
+        soup = BeautifulSoup(f, 'html.parser')
+        for paper in soup.select('.ptitle'):
+            title = paper.a.get_text()
+            dd = paper.find_next_sibling('dd')
+            authors = [a.get_text() for a in dd.select('a')]
+            dd = dd.find_next_sibling('dd')
+            ahref = list(filter(lambda x: 'pdf' in x.get_text().strip(),
+                                dd.select('a')))[0]
+            pdflink = 'http://openaccess.thecvf.com/' + ahref['href']
+            id = gen_id(year, 'ICCV', authors, title)
+            res += gen_single_bib(id, title, ' and '.join(authors), pdflink,
+                                  year, "ICCV")
+    return res
+
+smart_scholar_html_dir = '/home/hebi/github/smart-scholar-dist/html'
+smart_scholar_bib_dir = '/home/hebi/github/smart-scholar-dist/bib'
+
+# gen_iccv_bib(os.path.join(smart_scholar_html_dir, 'ICCV/ICCV-2015.html'))
+
+
+##############################
+## Gen All
+##############################
+
+def gen_cvpr_all():
+    gen_all(os.path.join(smart_scholar_bib_dir, 'CVPR'),
+            os.path.join(smart_scholar_html_dir, 'CVPR'),
+            gen_cvpr_bib)
+
+def gen_iccv_all():
+    gen_all(os.path.join(smart_scholar_bib_dir, 'ICCV'),
+            os.path.join(smart_scholar_html_dir, 'ICCV'),
+            gen_iccv_bib)
+
+def gen_aaai_all():
+    gen_all('./bib/auto/AAAI',
+            './html/AAAI',
+            gen_aaai_bib)
+
+    
+def gen_nips_all():
+    gen_all('./bib/auto/NIPS',
+            './html/NIPS',
+            gen_nips_bib)
+
+def gen_acml_all():
+    gen_all('./bib/auto/ACML',
+            './html/ACML',
+            gen_mlr_bib)
+
+def gen_colt_all():
+    gen_all('./bib/auto/COLT',
+            './html/COLT',
+            gen_mlr_bib)
+
+def gen_aistats_all():
+    gen_all('./bib/auto/AISTATS',
+            './html/AISTATS',
+            gen_mlr_bib)
+    
+def gen_all(outdir, htmldir, gen_bib_func):
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    for root, dirs, files in os.walk(htmldir):
+        for f in files:
+            p = os.path.join(root, f)
+            print(p)
+            outfile = os.path.join(outdir, p[p.rfind('/')+1:p.rfind('.')]+'.bib')
+            with open(outfile, 'w') as f:
+                f.write(gen_bib_func(p))
+                
+def gen_all_by_year(conf, years, gen_bib_func):
+    outdir = './bib/auto/' + conf
+    htmldir = './html/' + conf
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    for root, dirs, files in os.walk(htmldir):
+        for f in files:
+            p = os.path.join(root, f)
+            year = int(path2year(p))
+            if p.endswith('.html') and year in years:
+                print(p)
+                outfile = os.path.join(outdir, p[p.rfind('/')+1:p.rfind('.')]+'.bib')
+                with open(outfile, 'w') as f:
+                    f.write(gen_bib_func(p))
         
     
 if __name__ == '__main__':
+    # TODO the interface should be
+    #
+    # bibgen.py /path/to/htmls /path/to/bibs
+    #
+    # the script scan htmls and bibs, for each conf/conf-2000.html, if
+    # the bib file is not there in the bib directory, generate the bib
+    # by calling gen_bib(/path/to/html/file, /path/to/bib/file)
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
