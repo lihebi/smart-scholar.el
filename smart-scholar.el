@@ -12,17 +12,30 @@
 ;; This package provides a minor mode to frobnicate and/or
 ;; bifurcate any flanges you desire.  To activate it, just type
 
+;;; Code:
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; bibs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcustom smart-scholar-html-dir "~/github/smart-scholar-dist/html"
-  "Default directory for storing downloaded htmls.")
-(defcustom smart-scholar-pdf-dir "~/github/smart-scholar-pdfs"
-  "Default directory for storing downloaded pdfs.")
-(defcustom smart-scholar-bib-dir "~/github/smart-scholar-dist/bib"
-  "Default directory for storing generated bibs.")
+(defcustom smart-scholar-html-dir "~/.smart-scholar/html"
+  "Default directory for storing downloaded htmls."
+  :group 'smart-scholar
+  :type 'string)
+(defcustom smart-scholar-pdf-dir "~/.smart-scholar"
+  "Default directory for storing downloaded pdfs."
+  :group 'smart-scholar
+  :type 'string)
+(defcustom smart-scholar-bib-dir "~/.smart-scholar/bib"
+  "Default directory for storing generated bibs."
+  :group 'smart-scholar
+  :type 'string)
+(defcustom smart-scholar-manual-bib-dir "~/.smart-scholar/manual-bib/"
+  "Manual bib dir."
+  :group 'smart-scholar
+  :type 'string)
 
+;; This is not technically a configuration
 (defcustom smart-scholar-category-alist
   '(("AI" . ("NIPS" "ICML" "ACML" "AISTATS" "COLT"
              "IJCAI" "UAI" "AAAI" "JMLR" "ML" "ICCV" "CVPR"))
@@ -31,11 +44,9 @@
     ("PL" . ("CGO" "ASPLOS" "Onward"
              "OOPSLA" "PLDI" "SIGPLAN" "POPL"
              "Haskell" "ICFP" "LFP")))
-  "Conference by categories.  For easy loading.")
+  "Conference by categories.  For easy loading."
+  :group 'smart-scholar)
 
-(defcustom smart-scholar-manual-bib-dir
-  "~/github/research/bib/"
-  "Manual bib dir")
 
 (defun smart-scholar-categories ()
   (mapcar #'car smart-scholar-category-alist))
@@ -123,8 +134,10 @@
 (defun set-org-ref-pdfdir ()
   "Add pdf dirs to org-ref and bibtex-completion variables."
   (let ((dirs
-         (append (folder-dirs "~/github/smart-scholar-pdfs/auto")
-                 (folder-dirs "~/github/smart-scholar-pdfs/manual"))))
+         (append (folder-dirs smart-scholar-pdf-dir)
+                 ;; FIXME for my convenience
+                 (folder-dirs (concat smart-scholar-pdf-dir "/auto"))
+                 (folder-dirs (concat smart-scholar-pdf-dir "/manual")))))
     (cl-loop for dir in dirs do
              (add-to-list 'org-ref-pdf-directory dir)
              (add-to-list 'bibtex-completion-library-path dir))))
@@ -152,7 +165,8 @@
   (let ((key (smart-scholar-bibtex-key-at-point))
         (pdflink (smart-scholar-bibtex-pdflink-at-point)))
     (let ((conf (second (split-string key "-"))))
-      (let* ((dir (concat "~/github/research/pdf/auto/" conf "/"))
+      ;; FIXME (auto)
+      (let* ((dir (concat smart-scholar-pdf-dir "/auto/" conf "/"))
              (f (concat dir key ".pdf")))
         (when (not (file-exists-p dir))
           (make-directory dir))

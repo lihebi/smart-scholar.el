@@ -26,18 +26,36 @@ you will need to do:
 
 * Feature
 
+** Usage
+
+#+BEGIN_SRC elisp
+(use-package smart-scholar
+  :straight (smart-scholar :type git :host github
+                           :repo "lihebi/smart-scholar.el")
+  :config
+  (setq smart-scholar-html-dir "~/github/smart-scholar-dist/html")
+  (setq smart-scholar-pdf-dir "~/github/smart-scholar-pdfs")
+  (setq smart-scholar-bib-dir "~/github/smart-scholar-dist/bib")
+  (setq smart-scholar-manual-bib-dir "~/github/research/bib/"))
+#+END_SRC
+
+Then, use =M-x smart-scholar= to fire up the UI.
+
 ** Implementation
 *** download html
 *** generate bib from html
 *** load/unload bib
-
 *** download pdf
 
 ** support major CS conferences
 
+It cost time to download html and generate bib files. You can also
+download the final bib files
+https://github.com/lihebi/smart-scholar-dist
+
 AI conferences
-- [ ] NIPS
-- [ ] ICML
+- [X] NIPS
+- [X] ICML
 - [ ] ICLR
 
 Image Processing
@@ -51,12 +69,12 @@ NLP:
 - [ ] EMNLP
 
 Programming Language:
-- [ ] PLDI
-- [ ] POPL
+- [X] PLDI
+- [X] POPL
 
 System:
-- [ ] SOSP
-- [ ] OSDI
+- [X] SOSP
+- [X] OSDI
 
 For each of them, the package will manage
 - crawl the website for a bib file list, for each year

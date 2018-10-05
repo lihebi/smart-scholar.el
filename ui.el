@@ -136,6 +136,7 @@ callback."
                                (smart-scholar))
                      "Reset")
       (widget-insert "\n")
+      (widget-insert "\n")
       (widget-insert "Current Loaded bibs:\n")
   
       (widget-insert (string-join (smart-scholar-loaded-bibs) "\n- "))
