@@ -58,6 +58,14 @@ AI conferences
 - [X] ICML
 - [ ] ICLR
 
+Neural Science
+
+Robotics
+- [ ] ICRA: International Conference on Robotics and Automation (ICRA)
+- [ ] IRO: IEEE Transactions on Robotics
+- [ ] ICAPS: International Conference on Automated Planning and Scheduling
+- [ ] IROS: IEEE/RSJ International Conference on Intelligent Robots and Systems
+
 Image Processing
 - [ ] CVPR
 - [ ] ICCV

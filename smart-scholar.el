@@ -93,6 +93,14 @@
 (defun smart-scholar-unload-conf (conf)
   (smart-scholar--remove-bibs (conf-bib-files conf)))
 
+(defun smart-scholar-manual-bibs ()
+  (directory-files smart-scholar-manual-bib-dir
+                   t ".*\\.bib"))
+(defun smart-scholar-load-manual ()
+  (smart-scholar--add-bibs (smart-scholar-manual-bibs)))
+(defun smart-scholar-unload-manual ()
+  (smart-scholar--remove-bibs (smart-scholar-manual-bibs)))
+
 
 ;;;###autoload
 (defun smart-scholar-load-bib (load-what)
@@ -131,6 +139,7 @@
                           (or (string= ".." arg) (string= "." arg)))
                         (directory-files folder))))))
 
+;;;###autoload
 (defun set-org-ref-pdfdir ()
   "Add pdf dirs to org-ref and bibtex-completion variables."
   (let ((dirs
@@ -141,6 +150,46 @@
     (cl-loop for dir in dirs do
              (add-to-list 'org-ref-pdf-directory dir)
              (add-to-list 'bibtex-completion-library-path dir))))
+
+;; we have so many bib files, thus this function is very costy to
+;; execute, about 0.2s. The time consuming part is opening the files
+;; and inserting into the temp buffer. Thus, let me create a
+;; dedicated buffer for it and load once, and subsequent calls will
+;; use this buffer instead of create a new one.
+
+;; TODO add support for turn on such optimization
+(defun smart-scholar-load-bibtex-buffer ()
+  (interactive)
+  (message "Loading hebi-bibtex buffer. This is costy, should
+    only do once")
+  (with-current-buffer (get-buffer-create "hebi-bibtex")
+    (kill-region (point-min)
+                 (point-max))
+    (mapc #'insert-file-contents
+          (seq-filter #'file-exists-p
+                      (bibtex-completion-normalize-bibliography 'bibtex)))))
+
+;; with-current-buffer will call save-current-buffer, which although
+;; in C code, still cost a lot of time. But this function already
+;; saved 100+ times the time spent
+;; FIXME will this autoload to overwrite the file?
+;;;###autoload
+(defun bibtex-completion-get-entry1 (entry-key &optional do-not-find-pdf)
+  (when (not (get-buffer "hebi-bibtex"))
+    (hebi-load-bibtex-buffer))
+  (with-current-buffer "hebi-bibtex"
+    (goto-char (point-min))
+    (if (re-search-forward (concat "^[ \t]*@\\(" parsebib--bibtex-identifier
+                                   "\\)[[:space:]]*[\(\{][[:space:]]*"
+                                   (regexp-quote entry-key) "[[:space:]]*,")
+                           nil t)
+        (let ((entry-type (match-string 1)))
+          (reverse (bibtex-completion-prepare-entry
+                    (parsebib-read-entry entry-type (point) bibtex-completion-string-hash-table) nil do-not-find-pdf)))
+      (progn
+        (display-warning :warning (concat "Bibtex-completion couldn't find entry with key \"" entry-key "\"."))
+        nil))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Download pdf
@@ -173,6 +222,7 @@
         (when (and (not (file-exists-p f))
                    (not (string= pdflink "#f")))
           (url-copy-file pdflink f))))))
+
 ;;;###autoload
 (defun doi-utils-get-bibtex-entry-pdf ()
   (smart-scholar-bibtex-download-pdf-at-point))

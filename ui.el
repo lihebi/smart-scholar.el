@@ -6,6 +6,7 @@
   (require 'wid-edit))
 
 (defvar smart-scholar-widgets '())
+(defvar smart-scholar-manual-widget nil)
 (defvar test-widget)
 
 (defun get-children-widgets (cate)
@@ -25,10 +26,21 @@
                             (smart-scholar-loaded-bibs)))
               (smart-scholar-conferences)))
 
+(defun manual-loaded ()
+  (not
+   (null
+    (seq-filter (lambda (bib)
+                  (string-match-p
+                   (regexp-quote (expand-file-name smart-scholar-manual-bib-dir))
+                   bib))
+                (smart-scholar-loaded-bibs)))))
+
 (defun update-widgets-for-loaded ()
   (mapc (lambda (conf)
           (widget-value-set (get-widget conf) t))
         (loaded-conferences))
+  (widget-value-set smart-scholar-manual-widget
+                    (manual-loaded))
   (update-widgets))
 
 (defun update-widgets (&optional name)
@@ -72,9 +84,10 @@ update the category by its children conferences."
 (defun smart-scholar-reload ()
   "Reload current selection."
   (mapc #'smart-scholar-load-conf (get-selected-conf))
-  (mapc #'smart-scholar-unload-conf (get-unselected-conf)))
-
-
+  (mapc #'smart-scholar-unload-conf (get-unselected-conf))
+  (if (widget-value smart-scholar-manual-widget)
+      (smart-scholar-load-manual)
+    (smart-scholar-unload-manual)))
 
 (defun create-named-checkbox (name)
   "Named checkbox with :name NAME property and update-widgets
@@ -95,6 +108,7 @@ callback."
     (with-current-buffer buffer
       (kill-all-local-variables)
       (make-local-variable 'smart-scholar-widgets)
+      (make-local-variable 'smart-scholar-manual-widget)
       (let ((inhibit-read-only t))
         (erase-buffer))
       (remove-overlays)
@@ -102,6 +116,9 @@ callback."
       (setq smart-scholar-widgets '(dummy 1))
 
       (widget-insert "Smart Scholar User Interface.\n\n")
+
+      (setq smart-scholar-manual-widget (widget-create 'checkbox t))
+      (widget-insert " Manual\n")
 
       (mapcar (lambda (cate)
                 (let ((confs (category->conferences cate)))
@@ -145,8 +162,14 @@ callback."
       ;; TODO binding for swith checkbox
       (let ((mymap (copy-keymap widget-keymap)))
         (define-key mymap (kbd "g") 'smart-scholar)
+        (define-key mymap (kbd "q") 'quit-window)
         (use-local-map mymap))
       (widget-setup)
       (goto-char (point-min))
-      (display-buffer buffer))))
+      ;; (display-buffer buffer)
+      (pop-to-buffer buffer)
+      ;; load bibtex-buffer
+      (smart-scholar-load-bibtex-buffer)
+      ;; (switch-to-buffer-other-window buffer)
+      )))
 
