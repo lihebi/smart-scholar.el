@@ -26,7 +26,8 @@ def title_first_word(title):
 
 
 def gen_id(year, conf, authors, title):
-    return '-'.join([year, conf, authors[0].split(' ')[-1], title_first_word(title)])
+    return '-'.join([str(year), str(conf),
+                     authors[0].split(' ')[-1], title_first_word(title)])
 
 def authors_str2lst(str):
     return list(map(lambda s: s.strip(), re.split(r',|;|\*| and ', str)))
@@ -38,7 +39,7 @@ def gen_single_bib(id, title, author, pdflink, year, booktitle):
     return ('@inproceedings{' + id + ",\n"
             + "  title={" + clean_string(title) + "},\n"
             + "  author={" + clean_string(author) + "},\n"
-            + "  year={" + year + "},\n"
+            + "  year={" + str(year) + "},\n"
             + "  booktitle={" + booktitle + "},\n"
             + "  pdflink={" + pdflink + "}\n}\n")
 
