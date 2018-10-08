@@ -176,7 +176,7 @@
 ;;;###autoload
 (defun bibtex-completion-get-entry1 (entry-key &optional do-not-find-pdf)
   (when (not (get-buffer "hebi-bibtex"))
-    (hebi-load-bibtex-buffer))
+    (smart-scholar-load-bibtex-buffer))
   (with-current-buffer "hebi-bibtex"
     (goto-char (point-min))
     (if (re-search-forward (concat "^[ \t]*@\\(" parsebib--bibtex-identifier
