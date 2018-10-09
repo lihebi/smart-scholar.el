@@ -8,30 +8,11 @@
 from bs4 import BeautifulSoup
 import os
 import requests
-from bibgen import gen_id, gen_single_bib
 import re
 import time
 
-import hashlib
+from utils import gen_hash_filename, download_file, gen_id, gen_single_bib
 
-def hash_string(s):
-    m = hashlib.sha256()
-    m.update(s.encode('utf8'))
-    # m.update(b" the spammish repetition")
-    return m.hexdigest()
-
-
-def download_file(url, filename):
-    print('downloading ' + url + ' into ' + filename + ' ..')
-    if os.path.exists(filename):
-        print('exists. Skip')
-    else:
-        r = requests.get(url)
-        with open(filename, 'wb') as f:
-            f.write(r.content)
-        # print('sleeping 5 sec ..')
-        # time.sleep(5)
-        
 def ieee_index_page(pnumber):
     """Return a list [title] and [link] for each conference year. The
     year,link pair should be determined outside.
@@ -80,12 +61,6 @@ def ieee_journal_index_page(punumber):
             volumes[year].append(link)
     return volumes
     
-    
-
-def gen_hash_filename(link):
-    # FIXME use system tmp dir
-    return 'tmp/' + hash_string(link)
-
 def ieee_conference_get_pagination(year, conf, link):
     """Return [link] for all pagination of this conference
     """
@@ -155,29 +130,6 @@ def tro_bib(year):
             time.sleep(3)
     return res
 
-def gen_bib(conf, bib_func, year):
-    bib_dir = '/home/hebi/github/smart-scholar-dist/bib/' + conf
-    if not os.path.exists(bib_dir):
-        os.makedirs(bib_dir)
-    bib_file = os.path.join(bib_dir, conf + '-' + str(year) + '.bib')
-    if not os.path.exists(bib_file):
-        bib = bib_func(year)
-        with open(bib_file, 'w') as f:
-            f.write(bib)
-
-        
-def gen_tro_all():
-    for year in range(2004, 2019):
-        print('----', year)
-        gen_tro(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-        
-def gen_tro(year):
-    gen_bib('TRO', tro_bib, year)
-
-def gen_icra(year):
-    gen_bib('ICRA', icra_bib, year)
     
 def iros_bib(year):
     iros_index_pnumber = '1000393'
@@ -186,38 +138,3 @@ def iros_bib(year):
     link = links[year - 1988]
     return ieee_conference_bib_with_pagination(year, 'IROS', link)
 
-def gen_iros(year):
-    gen_bib('IROS', iros_bib, year)
-
-def gen_icra_all():
-    for year in range(1984, 2019):
-        print('----', year)
-        gen_icra(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-
-def gen_iros_all():
-    for year in range(1988, 2018):
-        print('----', year)
-        gen_iros(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-    
-
-if __name__ == '__hebi__':
-    # download conference index
-    # extract conference pnumber by year
-    # download conference html by year
-    # parse for bib
-    # ICRA: https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000639
-    # https://ieeexplore.ieee.org/servlet/opac?punumber=1000639
-    ieee_index_page('1000639')
-    bib = icra_bib(2018)
-    gen_icra(2018)
-    gen_iros(2017)
-    gen_icra_all()
-    gen_iros_all()
-    bib = tro_bib(2018)
-    gen_tro_all()
-    # gen_id(1028, 'hfh', 'he', 'a new')
-    pass
