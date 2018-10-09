@@ -61,14 +61,14 @@ AI conferences
 Neural Science
 
 Robotics
-- [ ] ICRA: International Conference on Robotics and Automation (ICRA)
-- [ ] IRO: IEEE Transactions on Robotics
+- [X] ICRA: International Conference on Robotics and Automation
+- [X] TRO: IEEE Transactions on Robotics
 - [ ] ICAPS: International Conference on Automated Planning and Scheduling
-- [ ] IROS: IEEE/RSJ International Conference on Intelligent Robots and Systems
+- [X] IROS: IEEE/RSJ International Conference on Intelligent Robots and Systems
 
 Image Processing
-- [ ] CVPR
-- [ ] ICCV
+- [X] CVPR
+- [X] ICCV
 - [ ] ECCV
 
 NLP:
