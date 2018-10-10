@@ -43,7 +43,9 @@
     ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB"))
     ("PL" . ("CGO" "ASPLOS" "Onward"
              "OOPSLA" "PLDI" "SIGPLAN" "POPL"
-             "Haskell" "ICFP" "LFP")))
+             "Haskell" "ICFP" "LFP"))
+    ("NLP" . ("CL" "ACL" "NAACL" "EACL" "EMNLP"))
+    ("Robotics" . ("ICRA" "IROS" "TRO")))
   "Conference by categories.  For easy loading."
   :group 'smart-scholar)
 
@@ -208,6 +210,18 @@
     (re-search-forward "pdflink={\\(.*\\)}" nil 'move)
     (match-string-no-properties 1)))
 
+(defun ieee-filter-link (link)
+  ;; <iframe src="https://ieeexplore.ieee.org/ielx2/4535/12853/00593671.pdf?tp=&arnumber=593671&isnumber=12853" frameborder=0>
+  (if (string-prefix-p "https://ieeexplore.ieee.org/stamp/stamp.jsp?"
+                       link)
+      ;; download html
+      ;; parse html for the true link
+      (with-current-buffer (url-retrieve-synchronously link)
+        (goto-char (point-min))
+        (when (re-search-forward "<iframe src=\"\\(http[[:ascii:]]*?\\)\"" nil t)
+          (match-string 1)))
+    link))
+
 ;;;###autoload
 (defun smart-scholar-bibtex-download-pdf-at-point ()
   (interactive)
@@ -221,7 +235,9 @@
           (make-directory dir))
         (when (and (not (file-exists-p f))
                    (not (string= pdflink "#f")))
-          (url-copy-file pdflink f))))))
+          (url-copy-file
+           ;; may contact ieee.org
+           (ieee-filter-link pdflink) f))))))
 
 ;;;###autoload
 (defun doi-utils-get-bibtex-entry-pdf ()

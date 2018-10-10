@@ -58,6 +58,19 @@ AI conferences
 - [X] ICML
 - [ ] ICLR
 
+
+- ICLR index: https://iclr.cc/archive/index.html
+- 2013: https://iclr.cc/archive/2013/conference-proceedings.html
+- 2014: https://iclr.cc/archive/2014/conference-proceedings/
+- 2015: https://iclr.cc/archive/www/doku.php%3Fid=iclr2015:accepted-main.html
+- 2016: https://iclr.cc/archive/www/doku.php%3Fid=iclr2016:accepted-main.html
+- open review index: https://openreview.net/group?id=ICLR.cc
+- 2013 open review: https://openreview.net/group?id=ICLR.cc/2013
+- 2017 open review: https://openreview.net/group?id=ICLR.cc/2017/conference
+- 2018 open review: https://openreview.net/group?id=ICLR.cc/2018/Conference
+- 2019 open reviwe: https://openreview.net/group?id=ICLR.cc/2019/Conference
+
+
 Neural Science
 
 Robotics
@@ -69,12 +82,14 @@ Robotics
 Image Processing
 - [X] CVPR
 - [X] ICCV
-- [ ] ECCV
+- [ ] ECCV: https://link.springer.com/conference/eccv
 
 NLP:
-- [ ] ACL
-- [ ] NAACL
-- [ ] EMNLP
+- [X] CL
+- [X] ACL
+- [X] EACL
+- [X] NAACL
+- [X] EMNLP
 
 Programming Language:
 - [X] PLDI

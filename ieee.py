@@ -13,7 +13,7 @@ import time
 
 from utils import gen_hash_filename, download_file, gen_id, gen_single_bib
 
-def ieee_index_page(pnumber):
+def ieee_index_page(punumber):
     """Return a list [title] and [link] for each conference year. The
     year,link pair should be determined outside.
 
@@ -21,12 +21,12 @@ def ieee_index_page(pnumber):
     # if not exist, download to a tmp file
     # https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000639
     # parse the file
-    # get the list of pnumber for each year, and return
-    url = 'https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=' + str(pnumber)
+    # get the list of punumber for each year, and return
+    url = 'https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=' + str(punumber)
     html_file = gen_hash_filename(url)
     if not os.path.exists(html_file):
         download_file(url, html_file)
-    soup = BeautifulSoup(open(html_file))
+    soup = BeautifulSoup(open(html_file), 'lxml')
     texts = []
     links = []
     for a in soup.select('.detail li a'):
@@ -47,7 +47,7 @@ def ieee_journal_index_page(punumber):
     html_file = gen_hash_filename(url)
     if not os.path.exists(html_file):
         download_file(url, html_file)
-    soup = BeautifulSoup(open(html_file))
+    soup = BeautifulSoup(open(html_file), 'lxml')
     volumes = {}
     for ul in soup.select('.volumes ul'):
         # pi-2012
@@ -67,7 +67,7 @@ def ieee_conference_get_pagination(year, conf, link):
     html_file = gen_hash_filename(link)
     if not os.path.exists(html_file):
         download_file(link, html_file)
-    soup = BeautifulSoup(open(html_file))
+    soup = BeautifulSoup(open(html_file), 'lxml')
     res = []
     # the first page
     res.append(link)
@@ -94,10 +94,12 @@ def ieee_conference_bib(year, conf, link):
     html_file = gen_hash_filename(link)
     if not os.path.exists(html_file):
         download_file(link, html_file)
-    soup = BeautifulSoup(open(html_file))
+    soup = BeautifulSoup(open(html_file), 'lxml')
     res = ''
     for div in soup.select('.txt'):
         if div.h3.a and div.select('.authors a'):
+            for f in div.select('formula'):
+                f.decompose()
             title = div.h3.get_text()
             # "/document/8461262/"
             arnumber = re.findall(r'/(\d+)/', div.h3.a['href'])[0]
@@ -110,9 +112,8 @@ def ieee_conference_bib(year, conf, link):
     return res
 
 def icra_bib(year):
-    icra_index_pnumber = '1000639'
-    _, links = ieee_index_page(icra_index_pnumber)
-    years = list(range(1984, 2019))
+    icra_index_punumber = '1000639'
+    _, links = ieee_index_page(icra_index_punumber)
     link = links[year - 1984]
     return ieee_conference_bib_with_pagination(year, 'ICRA', link)
 
@@ -126,15 +127,41 @@ def tro_bib(year):
         for link in links:
             res += ieee_conference_bib_with_pagination(year, 'TRO', link)
             # sleep for journal
-            print('sleeping 3 sec ..')
-            time.sleep(3)
+            # print('sleeping 3 sec ..')
+            # time.sleep(3)
     return res
 
     
 def iros_bib(year):
-    iros_index_pnumber = '1000393'
-    _, links = ieee_index_page(iros_index_pnumber)
-    years = list(range(1988, 2018))
+    iros_index_punumber = '1000393'
+    _, links = ieee_index_page(iros_index_punumber)
     link = links[year - 1988]
     return ieee_conference_bib_with_pagination(year, 'IROS', link)
 
+# missing 1990
+cvpr_years = list(range(1988, 1990))
+# missing 1995
+cvpr_years += list(range(1991, 1995))
+# missing 2002
+cvpr_years += list(range(1996, 2002))
+# 2013-after can be downloaded via http://openaccess.thecvf.com
+cvpr_years += list(range(2003, 2018))
+
+
+def cvpr_bib(year):
+    # https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000147
+    punumber = '1000147'
+    _, links = ieee_index_page(punumber)
+    d = {year:link for year,link in zip(cvpr_years, links)}
+    link = d[year]
+    return ieee_conference_bib_with_pagination(year, 'CVPR', link)
+
+iccv_years = [1988, 1990, 1993, 1995, 1998, 1999, 2001, 2003, 2005,
+              2007, 2009, 2011, 2013, 2015, 2017]
+def iccv_bib(year):
+    # https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000149
+    punumber = '1000149'
+    _, links = ieee_index_page(punumber)
+    d = {year:link for year,link in zip(iccv_years, links)}
+    link = d[year]
+    return ieee_conference_bib_with_pagination(year, 'ICCV', link)

@@ -4,6 +4,7 @@ from ieee import tro_bib, icra_bib, iros_bib
 from acl import acl_bib, cl_bib, naacl_bib, eacl_bib, emnlp_bib
 import time
 
+
 def gen_bib(conf, bib_func, year):
     """bib_func should be (lambda (year))
     """
@@ -15,6 +16,27 @@ def gen_bib(conf, bib_func, year):
         bib = bib_func(year)
         with open(bib_file, 'w') as f:
             f.write(bib)
+
+def gen_cvpr(year):
+    gen_bib('CVPR', cvpr_bib, year)
+
+            
+def gen_cvpr_all():
+    for year in cvpr_years:
+        print('----', year)
+        gen_cvpr(year)
+        print('sleeping 10 sec ..')
+        time.sleep(10)
+            
+def gen_iccv(year):
+    gen_bib('ICCV', iccv_bib, year)
+
+def gen_iccv_all():
+    for year in iccv_years:
+        print('----', year)
+        gen_iccv(year)
+        print('sleeping 10 sec ..')
+        time.sleep(10)
         
 def gen_tro_all():
     for year in range(2004, 2019):
@@ -111,6 +133,7 @@ if __name__ == '__hebi__':
     gen_icra_all()
     gen_iros_all()
     bib = tro_bib(2018)
+    gen_tro(2007)
     gen_tro_all()
     gen_acl(2000)
     gen_acl_all()
@@ -118,5 +141,8 @@ if __name__ == '__hebi__':
     gen_naacl_all()
     gen_eacl_all()
     gen_emnlp_all()
+    bib = tro_bib(2007)
     # gen_id(1028, 'hfh', 'he', 'a new')
+    gen_iccv_all()
+    gen_cvpr_all()
     pass
