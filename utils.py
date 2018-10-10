@@ -39,7 +39,7 @@ stop_words = set(["you", "the", "and", "can", "where", "when", "how",
 
 
 def title_first_word(title):
-    lst = re.split(r'[\s:\-?()/,\'*"#$+“”’]', title.lower())
+    lst = re.split(r'[\s:{}\-?()/,\'*"#$+“”’]', title.lower())
     lst = list(filter(lambda s: len(s) > 2, lst))
     lst = list(filter(lambda s: s not in stop_words, lst))
     return lst[0].title() if lst else 'Title'

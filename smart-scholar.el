@@ -38,7 +38,8 @@
 ;; This is not technically a configuration
 (defcustom smart-scholar-category-alist
   '(("AI" . ("NIPS" "ICML" "ACML" "AISTATS" "COLT"
-             "IJCAI" "UAI" "AAAI" "JMLR" "ML" "ICCV" "CVPR"))
+             "IJCAI" "UAI" "AAAI" "JMLR" "ML"))
+    ("CV" . ("ICCV" "CVPR"))
     ("SE" . ("ASE" "PASTE" "FSE" "ICSE" "ISSTA" "MSR"))
     ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB"))
     ("PL" . ("CGO" "ASPLOS" "Onward"
