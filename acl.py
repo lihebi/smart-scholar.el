@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from utils import gen_hash_filename, download_file, gen_id, gen_single_bib
+from utils import download_to_hash, download_file, gen_id, gen_single_bib
 from bs4 import BeautifulSoup
 import os
 
@@ -11,9 +11,7 @@ def acl_conference_bib(year, conf, link):
     # link = 'https://aclanthology.info/events/acl-2018'
     # year = 2018
     # conf = 'ACL'
-    html_file = gen_hash_filename(link)
-    if not os.path.exists(html_file):
-        download_file(link, html_file)
+    html_file = download_to_hash(link)
     soup = BeautifulSoup(open(html_file), 'lxml')
     res = ''
     # soup.select('#content p')[3].select('a[href^=/people]')

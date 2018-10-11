@@ -10,8 +10,9 @@ import os
 import requests
 import re
 import time
+import math
 
-from utils import gen_hash_filename, download_file, gen_id, gen_single_bib
+from utils import download_file, gen_id, gen_single_bib, download_to_hash
 
 def ieee_index_page(punumber):
     """Return a list [title] and [link] for each conference year. The
@@ -23,7 +24,7 @@ def ieee_index_page(punumber):
     # parse the file
     # get the list of punumber for each year, and return
     url = 'https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=' + str(punumber)
-    html_file = gen_hash_filename(url)
+    html_file = download_to_hash(url)
     if not os.path.exists(html_file):
         download_file(url, html_file)
     soup = BeautifulSoup(open(html_file), 'lxml')
@@ -44,9 +45,7 @@ def ieee_journal_index_page(punumber):
     # https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=8860
     # punumber=8860
     url = 'https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=' + str(punumber)
-    html_file = gen_hash_filename(url)
-    if not os.path.exists(html_file):
-        download_file(url, html_file)
+    html_file = download_to_hash(url)
     soup = BeautifulSoup(open(html_file), 'lxml')
     volumes = {}
     for ul in soup.select('.volumes ul'):
@@ -64,22 +63,22 @@ def ieee_journal_index_page(punumber):
 def ieee_conference_get_pagination(year, conf, link):
     """Return [link] for all pagination of this conference
     """
-    html_file = gen_hash_filename(link)
-    if not os.path.exists(html_file):
-        download_file(link, html_file)
+    html_file = download_to_hash(link)
     soup = BeautifulSoup(open(html_file), 'lxml')
     res = []
-    # the first page
-    res.append(link)
     # if have pagination
-    if soup.select('.pagination a'):
-        pagenum = int(soup.select('.pagination a')[-2].get_text().strip())
-        hidden = soup.select('input#oqs')[0]['value']
-        # the first is obit
-        for page in range(1, pagenum):
-            # https://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=8449910&filter=issueId%20EQ%20%228460178%22&pageNumber=2
-            link += '&' + hidden + '&pageNumber=' + str(page+1)
-            res.append(link)
+    hidden = soup.select('input#oqs')[0]['value']
+    text = soup.select('.results-display')[0].get_text()
+    # Displaying Results 801 - 824 of 824
+    total = int(re.findall(r'Displaying Results .* of (\d+)', text)[0])
+    # rowsPerPage=100
+    pagenum = math.ceil(total / 100)
+    for page in range(0, pagenum):
+        # https://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=8449910&filter=issueId%20EQ%20%228460178%22&pageNumber=2
+        link += ('&' + hidden
+                 + '&rowsPerPage=100'
+                 + '&pageNumber=' + str(page+1))
+        res.append(link)
     return res
 
 def ieee_conference_bib_with_pagination(year, conf, link):
@@ -89,11 +88,12 @@ def ieee_conference_bib_with_pagination(year, conf, link):
     for page in pages:
         res += ieee_conference_bib(year, conf, page)
     return res
+
+if __name__ == '__test__':
+    ieee_conference_get_pagination(2018, 'ICRA', 'https://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=8449910')
     
 def ieee_conference_bib(year, conf, link):
-    html_file = gen_hash_filename(link)
-    if not os.path.exists(html_file):
-        download_file(link, html_file)
+    html_file = download_to_hash(link)
     soup = BeautifulSoup(open(html_file), 'lxml')
     res = ''
     for div in soup.select('.txt'):
@@ -111,12 +111,14 @@ def ieee_conference_bib(year, conf, link):
             res += bib
     return res
 
+icra_years = list(range(1984, 2019))
 def icra_bib(year):
     icra_index_punumber = '1000639'
     _, links = ieee_index_page(icra_index_punumber)
-    link = links[year - 1984]
+    link = links[year - icra_years[0]]
     return ieee_conference_bib_with_pagination(year, 'ICRA', link)
 
+tro_years = list(range(2004, 2019))
 def tro_bib(year):
     tro_index_punumber = 8860
     # TODO TRO has two more titles. This one only cover [2004,]
@@ -131,12 +133,14 @@ def tro_bib(year):
             # time.sleep(3)
     return res
 
-    
+
+iros_years = list(range(1988, 2018))
 def iros_bib(year):
     iros_index_punumber = '1000393'
     _, links = ieee_index_page(iros_index_punumber)
-    link = links[year - 1988]
+    link = links[year - iros_years[0]]
     return ieee_conference_bib_with_pagination(year, 'IROS', link)
+
 
 # missing 1990
 cvpr_years = list(range(1988, 1990))
@@ -146,8 +150,6 @@ cvpr_years += list(range(1991, 1995))
 cvpr_years += list(range(1996, 2002))
 # 2013-after can be downloaded via http://openaccess.thecvf.com
 cvpr_years += list(range(2003, 2018))
-
-
 def cvpr_bib(year):
     # https://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000147
     punumber = '1000147'

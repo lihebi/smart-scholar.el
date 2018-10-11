@@ -4,7 +4,7 @@ import os
 import hashlib
 import requests
 import re
-
+import time
 
 def hash_string(s):
     m = hashlib.sha256()
@@ -16,19 +16,36 @@ def gen_hash_filename(link):
     # FIXME use system tmp dir
     return 'tmp/' + hash_string(link)
 
+def download_to_hash(url):
+    """Download url to tmp/HASHNAME. Return the local hash file.
+    """
+    f = gen_hash_filename(url)
+    if not os.path.exists(f):
+        download_file(url, f)
+    return f
+    
+
 def download_file(url, filename):
-    print('downloading ' + url + ' into ' + filename + ' ..')
-    if os.path.exists(filename):
-        print('exists. Skip')
-    else:
+    """Download url into file.
+
+    All the internet connection should go through this function, and
+    this funciton contain rate limit. It maintain a count variable. If
+    the count variable reaches 5, it sleep for 5 seconds.
+
+    """
+    if not os.path.exists(filename):
+        download_file.count += 1
+        # sleep every 5 downloads
+        if download_file.count == 5:
+            print('-- sleeping for 10 sec')
+            download_file.count = 0
+            time.sleep(10)
+        print('-- downloading ' + url + ' into ' + filename + ' ..')
         r = requests.get(url)
         with open(filename, 'wb') as f:
             f.write(r.content)
-        # print('sleeping 5 sec ..')
-        # time.sleep(5)
-
-
-
+download_file.count = 0
+            
 ##############################
 ## Utility functions
 ##############################

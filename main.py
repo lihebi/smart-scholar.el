@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-from ieee import tro_bib, icra_bib, iros_bib
+from ieee import tro_bib, icra_bib, iros_bib, iccv_bib, cvpr_bib
+from ieee import tro_years, icra_years, iros_years, iccv_years, cvpr_years
 from acl import acl_bib, cl_bib, naacl_bib, eacl_bib, emnlp_bib
+from springer import eccv
 import time
 
 
@@ -17,56 +19,36 @@ def gen_bib(conf, bib_func, year):
         with open(bib_file, 'w') as f:
             f.write(bib)
 
-def gen_cvpr(year):
-    gen_bib('CVPR', cvpr_bib, year)
+conference_metadata = {
+    'CVPR': [cvpr_bib, cvpr_years],
+    'ICCV': [iccv_bib, iccv_years],
+    'TRO': [tro_bib, tro_years],
+    'ICRA': [icra_bib, icra_years],
+    'IROS': [iros_bib, iros_years]
+}
 
-            
-def gen_cvpr_all():
-    for year in cvpr_years:
-        print('----', year)
-        gen_cvpr(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-            
-def gen_iccv(year):
-    gen_bib('ICCV', iccv_bib, year)
+def gen_by_conf_class(conf_class, year):
+    conf_obj = conf_class()
+    gen_bib(conf_obj.name, conf_obj.bib, year)
 
-def gen_iccv_all():
-    for year in iccv_years:
-        print('----', year)
-        gen_iccv(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-        
-def gen_tro_all():
-    for year in range(2004, 2019):
-        print('----', year)
-        gen_tro(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-        
-def gen_tro(year):
-    gen_bib('TRO', tro_bib, year)
+def gen_by_conf_class_all(conf_class):
+    """Generate for all years
+    """
+    conf_obj = conf_class()
+    for year in conf_obj.years():
+        print('--', year)
+        gen_by_conf_class(conf_class, year)
 
-def gen_icra(year):
-    gen_bib('ICRA', icra_bib, year)
-
-def gen_iros(year):
-    gen_bib('IROS', iros_bib, year)
-
-def gen_icra_all():
-    for year in range(1984, 2019):
-        print('----', year)
-        gen_icra(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
-
-def gen_iros_all():
-    for year in range(1988, 2018):
-        print('----', year)
-        gen_iros(year)
-        print('sleeping 10 sec ..')
-        time.sleep(10)
+def gen_by_conf(conf, year=None):
+    """If year is not given, download all
+    """
+    bib_func, years = conference_metadata[conf]
+    if year:
+        gen_bib(conf, bib_func, year)
+    else:
+        for year in years:
+            print('--', year)
+            gen_by_conf(conf, year)
 
 def gen_acl(year):
     gen_bib('ACL', acl_bib, year)
@@ -80,17 +62,18 @@ def gen_naacl(year):
 def gen_emnlp(year):
     gen_bib('EMNLP', emnlp_bib, year)
 
+
 def gen_acl_all():
     # TODO before 2000
     for year in range(2000, 2019):
-        print('----', year)
+        print('--', year)
         gen_acl(year)
         print('sleeping 4 sec ..')
         time.sleep(4)
 def gen_cl_all():
     # TODO before 2000
     for year in range(2000, 2019):
-        print('----', year)
+        print('--', year)
         gen_cl(year)
         print('sleeping 4 sec ..')
         time.sleep(4)
@@ -99,7 +82,7 @@ def gen_naacl_all():
     # ALL
     for year in [2000, 2001, 2003, 2004, 2006, 2007, 2009, 2010, 2012,
                  2013, 2015, 2016, 2018]:
-        print('----', year)
+        print('--', year)
         gen_naacl(year)
         print('sleeping 4 sec ..')
         time.sleep(4)
@@ -107,14 +90,14 @@ def gen_eacl_all():
     # 17 14 12 09 06 03
     # TODO before 2000
     for year in [2003, 2006, 2009, 2012, 2014, 2017]:
-        print('----', year)
+        print('--', year)
         gen_eacl(year)
         print('sleeping 4 sec ..')
         time.sleep(4)
 def gen_emnlp_all():
     # ALL
     for year in range(1996, 2018):
-        print('----', year)
+        print('--', year)
         gen_emnlp(year)
         print('sleeping 4 sec ..')
         time.sleep(4)
@@ -128,10 +111,16 @@ if __name__ == '__hebi__':
     # https://ieeexplore.ieee.org/servlet/opac?punumber=1000639
     ieee_index_page('1000639')
     bib = icra_bib(2018)
-    gen_icra(2018)
-    gen_iros(2017)
-    gen_icra_all()
-    gen_iros_all()
+    
+    gen_by_conf('ICRA', 2018)
+    gen_by_conf('IROS', 2017)
+    gen_by_conf('TRO')
+    gen_by_conf('ICCV')
+    gen_by_conf('CVPR')
+
+    gen_by_conf_class(eccv, 2018)
+    gen_by_conf_class_all(eccv)
+    
     bib = tro_bib(2018)
     gen_tro(2007)
     gen_tro_all()
