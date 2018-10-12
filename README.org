@@ -56,7 +56,7 @@ https://github.com/lihebi/smart-scholar-dist
 AI conferences
 - [X] NIPS
 - [X] ICML
-- [ ] ICLR
+- [X] ICLR
 
 
 - ICLR index: https://iclr.cc/archive/index.html

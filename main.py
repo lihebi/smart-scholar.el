@@ -3,6 +3,7 @@
 from ieee import tro_bib, icra_bib, iros_bib, iccv_bib, cvpr_bib
 from ieee import tro_years, icra_years, iros_years, iccv_years, cvpr_years
 from acl import acl_bib, cl_bib, naacl_bib, eacl_bib, emnlp_bib
+from iclr import iclr_bib, iclr_years
 from springer import eccv
 import time
 
@@ -24,7 +25,8 @@ conference_metadata = {
     'ICCV': [iccv_bib, iccv_years],
     'TRO': [tro_bib, tro_years],
     'ICRA': [icra_bib, icra_years],
-    'IROS': [iros_bib, iros_years]
+    'IROS': [iros_bib, iros_years],
+    'ICLR': [iclr_bib, iclr_years]
 }
 
 def gen_by_conf_class(conf_class, year):
@@ -117,6 +119,7 @@ if __name__ == '__hebi__':
     gen_by_conf('TRO')
     gen_by_conf('ICCV')
     gen_by_conf('CVPR')
+    gen_by_conf('ICLR')
 
     gen_by_conf_class(eccv, 2018)
     gen_by_conf_class_all(eccv)
