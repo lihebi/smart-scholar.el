@@ -5,7 +5,7 @@
 ;; Author: Hebi Li <lihebi.com@gmail.com>
 ;; Version: 0.1
 ;; Keywords: Scholar
-;; URL: http://example.com/smart-scholar
+;; URL: http://github.com/lihebi/smart-scholar.el
 
 ;;; Commentary:
 
