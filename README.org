@@ -57,6 +57,7 @@ AI conferences
 - [X] NIPS
 - [X] ICML
 - [X] ICLR
+- [ ] neurocomputing https://www.sciencedirect.com/journal/neurocomputing
 
 
 - ICLR index: https://iclr.cc/archive/index.html
@@ -65,6 +66,7 @@ AI conferences
 - 2015: https://iclr.cc/archive/www/doku.php%3Fid=iclr2015:accepted-main.html
 - 2016: https://iclr.cc/archive/www/doku.php%3Fid=iclr2016:accepted-main.html
 - open review index: https://openreview.net/group?id=ICLR.cc
+  - TODO workshops
 - 2013 open review: https://openreview.net/group?id=ICLR.cc/2013
 - 2017 open review: https://openreview.net/group?id=ICLR.cc/2017/conference
 - 2018 open review: https://openreview.net/group?id=ICLR.cc/2018/Conference
