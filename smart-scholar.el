@@ -211,6 +211,13 @@
     (re-search-forward "pdflink={\\(.*\\)}" nil 'move)
     (match-string-no-properties 1)))
 
+(defun link-filter (link)
+  ;; (link-filter "https://arxiv.org/abs/1409.0473")
+  "Apply all filters for LINK."
+  (arxiv-filter
+   (ieee-filter-link
+    link)))
+
 (defun ieee-filter-link (link)
   ;; <iframe src="https://ieeexplore.ieee.org/ielx2/4535/12853/00593671.pdf?tp=&arnumber=593671&isnumber=12853" frameborder=0>
   (if (string-prefix-p "https://ieeexplore.ieee.org/stamp/stamp.jsp?"
@@ -222,6 +229,17 @@
         (when (re-search-forward "<iframe src=\"\\(http[[:ascii:]]*?\\)\"" nil t)
           (match-string 1)))
     link))
+
+(defun arxiv-filter (link)
+  ;; (arxiv-filter "http://arxiv.org/abs/1409.0473")
+  ;; https://arxiv.org/abs/1409.0473
+  ;; FIXME https
+  (let ((prefix "http://arxiv.org/abs")
+        (replace "http://arxiv.org/pdf"))
+    (if (string-prefix-p prefix link)
+        (concat replace
+                (substring link (length prefix)))
+      link)))
 
 ;;;###autoload
 (defun smart-scholar-bibtex-download-pdf-at-point ()
@@ -237,8 +255,10 @@
         (when (and (not (file-exists-p f))
                    (not (string= pdflink "#f")))
           (url-copy-file
-           ;; may contact ieee.org
-           (ieee-filter-link pdflink) f))))))
+           ;; may contact website, e.g. ieee.org
+           (link-filter pdflink) f))))))
+
+;; (url-copy-file "https://arxiv.org/pdf/1409.0473.pdf" "test.pdf")
 
 ;;;###autoload
 (defun doi-utils-get-bibtex-entry-pdf ()
