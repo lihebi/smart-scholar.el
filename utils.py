@@ -67,10 +67,11 @@ def gen_id(year, conf, authors, title):
                      authors[0].split(' ')[-1], title_first_word(title)])
 
 def authors_str2lst(str):
-    return list(map(lambda s: s.strip(), re.split(r',|;|\*| and ', str)))
+    res = list(map(lambda s: s.strip(), re.split(r',|;|\*| and ', str)))
+    return list(filter(lambda s: s, res))
 
 def clean_string(str):
-    return str.replace('\n', ' ').replace('  ', ' ').strip()
+    return re.sub(r'\s+', ' ', str).strip()
 
 def gen_single_bib(id, title, author, pdflink, year, booktitle):
     return ('@inproceedings{' + id + ",\n"

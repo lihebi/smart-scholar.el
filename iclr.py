@@ -55,12 +55,13 @@ def iclr_bib_2015_2016(year):
         div.a.decompose()
         authors_str = div.get_text()
         authors = authors_str2lst(authors_str)
-        # change title to workshop
-        if year == 2015 and first_workshop_15 in title:
-            conf = 'ICLRWorkshop'
-        id = gen_id(year, conf, authors, title)
-        bib = gen_single_bib(id, title, ' and '.join(authors), pdflink, year, conf)
-        res += bib
+        if authors:
+            # change title to workshop
+            if year == 2015 and first_workshop_15 in title:
+                conf = 'ICLRWorkshop'
+            id = gen_id(year, conf, authors, title)
+            bib = gen_single_bib(id, title, ' and '.join(authors), pdflink, year, conf)
+            res += bib
     return res
 
 # 13, 17
