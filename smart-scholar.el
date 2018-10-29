@@ -232,14 +232,10 @@
 
 (defun arxiv-filter (link)
   ;; (arxiv-filter "http://arxiv.org/abs/1409.0473")
-  ;; https://arxiv.org/abs/1409.0473
-  ;; FIXME https
-  (let ((prefix "http://arxiv.org/abs")
-        (replace "http://arxiv.org/pdf"))
-    (if (string-prefix-p prefix link)
-        (concat replace
-                (substring link (length prefix)))
-      link)))
+  (if (string-match "^https?://arxiv.org/abs/\\([0-9]+\\.[0-9]+\\)" link)
+      (let ((id (match-string-no-properties 1 link)))
+        (concat "https://arxiv.org/pdf/" id))
+    link))
 
 ;;;###autoload
 (defun smart-scholar-bibtex-download-pdf-at-point ()
