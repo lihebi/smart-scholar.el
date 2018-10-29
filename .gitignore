@@ -1,3 +1,4 @@
 tmp
 *.pdf
 __pycache__
+*.html
