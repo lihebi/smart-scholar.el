@@ -23,6 +23,17 @@ you will need to do:
 - Mendeley
 - https://github.com/forrestbao/autoscholar: personal summarization
 
+** TODO ECCV missing papers
+@inproceedings{2014-ECCV-Zeiler-Visualizing,
+  title={Visualizing and understanding convolutional networks},
+  author={Zeiler, Matthew D and Fergus, Rob},
+  booktitle={European conference on computer vision},
+  pages={818--833},
+  year={2014},
+  organization={Springer}
+}
+
+
 
 * Feature
 
