@@ -8,8 +8,7 @@ from other_conf import nips_bib, nips_years
 from springer import eccv
 import time
 
-
-BIB_DIR = './bib/'
+from config import *
 
 def gen_bib(conf, bib_func, year):
     """bib_func should be (lambda (year))
