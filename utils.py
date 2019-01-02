@@ -34,6 +34,8 @@ def download_file(url, filename):
 
     """
     if not os.path.exists(filename):
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
         download_file.count += 1
         # sleep every 5 downloads
         if download_file.count == 5:

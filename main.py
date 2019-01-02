@@ -4,14 +4,17 @@ from ieee import tro_bib, icra_bib, iros_bib, iccv_bib, cvpr_bib
 from ieee import tro_years, icra_years, iros_years, iccv_years, cvpr_years
 from acl import acl_bib, cl_bib, naacl_bib, eacl_bib, emnlp_bib
 from iclr import iclr_bib, iclr_years
+from other_conf import nips_bib, nips_years
 from springer import eccv
 import time
 
 
+BIB_DIR = './bib/'
+
 def gen_bib(conf, bib_func, year):
     """bib_func should be (lambda (year))
     """
-    bib_dir = '/home/hebi/github/smart-scholar-dist/bib/' + conf
+    bib_dir = BIB_DIR + conf
     if not os.path.exists(bib_dir):
         os.makedirs(bib_dir)
     bib_file = os.path.join(bib_dir, conf + '-' + str(year) + '.bib')
@@ -20,13 +23,15 @@ def gen_bib(conf, bib_func, year):
         with open(bib_file, 'w') as f:
             f.write(bib)
 
+   
 conference_metadata = {
     'CVPR': [cvpr_bib, cvpr_years],
     'ICCV': [iccv_bib, iccv_years],
     'TRO': [tro_bib, tro_years],
     'ICRA': [icra_bib, icra_years],
     'IROS': [iros_bib, iros_years],
-    'ICLR': [iclr_bib, iclr_years]
+    'ICLR': [iclr_bib, iclr_years],
+    "NIPS": [nips_bib, nips_years]
 }
 
 def gen_by_conf_class(conf_class, year):
@@ -110,6 +115,7 @@ if __name__ == '__hebi__':
     gen_by_conf('ICCV')
     gen_by_conf('CVPR')
     gen_by_conf('ICLR')
+    gen_by_conf('NIPS')
 
     gen_by_conf_class(eccv, 2018)
     gen_by_conf_class_all(eccv)
