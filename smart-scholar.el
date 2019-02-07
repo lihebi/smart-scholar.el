@@ -97,8 +97,9 @@
   (smart-scholar--remove-bibs (conf-bib-files conf)))
 
 (defun smart-scholar-manual-bibs ()
-  (directory-files smart-scholar-manual-bib-dir
-                   t ".*\\.bib"))
+  (when (file-exists-p smart-scholar-manual-bib-dir)
+    (directory-files smart-scholar-manual-bib-dir
+                     t ".*\\.bib")))
 (defun smart-scholar-load-manual ()
   (smart-scholar--add-bibs (smart-scholar-manual-bibs)))
 (defun smart-scholar-unload-manual ()
