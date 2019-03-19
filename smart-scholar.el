@@ -248,7 +248,9 @@
       (let* ((dir (concat smart-scholar-pdf-dir "/auto/" conf "/"))
              (f (concat dir key ".pdf")))
         (when (not (file-exists-p dir))
-          (make-directory dir t))
+          (make-directory dir t)
+          ;; add this new dir into pdf search path
+          (set-org-ref-pdfdir))
         (when (and (not (file-exists-p f))
                    (not (string= pdflink "#f")))
           (url-copy-file
