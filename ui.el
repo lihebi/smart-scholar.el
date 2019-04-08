@@ -22,9 +22,14 @@
   ;; of loaded conferences
   (seq-filter (lambda (conf)
                 (seq-filter (lambda (bib)
-                              (string-match-p (regexp-quote conf) bib))
+                              (string-match-p (concat
+                                               "\\b"
+                                               (regexp-quote conf)
+                                               "\\b")
+                                              bib))
                             (smart-scholar-loaded-bibs)))
               (smart-scholar-conferences)))
+
 
 (defun manual-loaded ()
   (not
