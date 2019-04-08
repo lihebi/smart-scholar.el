@@ -208,9 +208,11 @@
 (defun smart-scholar-bibtex-pdflink-at-point ()
   (interactive)
   (save-excursion
-    (bibtex-beginning-of-entry)
-    (re-search-forward "pdflink={\\(.*\\)}" nil 'move)
-    (match-string-no-properties 1)))
+    (bibtex-end-of-entry)
+    (let ((bound (point)))
+      (bibtex-beginning-of-entry)
+      (re-search-forward "pdflink={\\(.*\\)}" bound 'move)
+      (match-string-no-properties 1))))
 
 (defun link-filter (link)
   ;; (link-filter "https://arxiv.org/abs/1409.0473")
@@ -238,11 +240,36 @@
         (concat "https://arxiv.org/pdf/" id))
     link))
 
+;; (setq url-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36")
+;; (setq url-user-agent 'default)
+;; seems acm is tolerate for emacs agent
+(defun download-acm-paper (url f)
+  ;; "http://dl.acm.org/ft_gateway.cfm?id=2677013&ftid=1522763&dwn=1"
+  (assert (string-prefix-p "https://dl.acm.org/ft_gateway.cfm" url))
+  (url-retrieve url
+                (lambda (status)
+                  (let ((real_url (plist-get status :redirect)))
+                    (assert (string-prefix-p "http://delivery.acm.org/" real_url))
+                    (url-copy-file real_url f)))))
+
+;; (url-copy-file "https://arxiv.org/pdf/1409.0473.pdf" "test.pdf")
+;; (download-acm-paper "https://dl.acm.org/ft_gateway.cfm?id=2677013&ftid=1522763&dwn=1"
+;;                     "test3.pdf")
+
+(defun download-paper (url f)
+  "Download paper from URL to file F."
+  (if (string-prefix-p "https://dl.acm.org/ft_gateway.cfm" url)
+      (download-acm-paper url f)
+    (url-copy-file url f)))
+
+
 ;;;###autoload
 (defun smart-scholar-bibtex-download-pdf-at-point ()
   (interactive)
   (let ((key (smart-scholar-bibtex-key-at-point))
         (pdflink (smart-scholar-bibtex-pdflink-at-point)))
+    (when (not pdflink)
+      (error "No pdf link found"))
     (let ((conf (second (split-string key "-"))))
       ;; FIXME (auto)
       (let* ((dir (concat smart-scholar-pdf-dir "/auto/" conf "/"))
@@ -253,11 +280,12 @@
           (set-org-ref-pdfdir))
         (when (and (not (file-exists-p f))
                    (not (string= pdflink "#f")))
-          (url-copy-file
+          (download-paper
            ;; may contact website, e.g. ieee.org
-           (link-filter pdflink) f))))))
+           (link-filter pdflink)
+           f))))))
 
-;; (url-copy-file "https://arxiv.org/pdf/1409.0473.pdf" "test.pdf")
+
 
 ;;;###autoload
 (defun doi-utils-get-bibtex-entry-pdf ()
