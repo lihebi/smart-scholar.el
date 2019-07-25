@@ -39,6 +39,7 @@
 (defcustom smart-scholar-category-alist
   '(("AI" . ("NIPS" "ICML" "ACML" "AISTATS" "COLT"
              "IJCAI" "UAI" "AAAI" "JMLR" "ML" "ICLR"))
+    ("arXiv" . ("cs.AI" "cs.LG" "cs.CV"))
     ("CV" . ("ICCV" "CVPR" "ECCV"))
     ("SE" . ("ASE" "PASTE" "FSE" "ICSE" "ISSTA" "MSR"))
     ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB"))
