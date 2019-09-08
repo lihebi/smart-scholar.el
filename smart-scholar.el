@@ -42,12 +42,12 @@
     ("arXiv" . ("cs.AI" "cs.LG" "cs.CV"))
     ("CV" . ("ICCV" "CVPR" "ECCV"))
     ("SE" . ("ASE" "PASTE" "FSE" "ICSE" "ISSTA" "MSR"))
-    ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB"))
+    ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB" "ISCA"))
     ("PL" . ("CGO" "ASPLOS" "Onward"
              "OOPSLA" "PLDI" "SIGPLAN" "POPL"
              "Haskell" "ICFP" "LFP"))
     ("NLP" . ("CL" "ACL" "NAACL" "EACL" "EMNLP"))
-    ("Robotics" . ("ICRA" "IROS" "TRO")))
+    ("Robotics" . ("ICRA" "IROS" "TRO" "DAC" "ICCAD")))
   "Conference by categories.  For easy loading."
   :group 'smart-scholar)
 
