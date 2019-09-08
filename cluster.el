@@ -44,7 +44,7 @@
               (buffer-substring-no-properties (point-min) (point-max)))))
     (let ((words (split-string str)))
       (let ((marked-words (count-word-frequency words)))
-        (with-current-buffer "*smart-scholar-cluster*"
+        (with-current-buffer (get-buffer-create "*smart-scholar-cluster*")
           (kill-region (point-min) (point-max))
           (insert (word-frequency->string marked-words)))))))
 
@@ -193,7 +193,7 @@
       (if (= (length titles) (length ids))
           (string-join
            (mapcar* (lambda (title id)
-                      (concat "** " title " cite:" id))
+                      (concat "** " "cite:" id " " title ))
                     titles ids)
            "\n")
         "Unmatched title and IDs"))))
@@ -204,9 +204,11 @@
 buffer with org titles for each paper."
   (interactive)
   (let ((str (bib->org-str)))
-    (with-current-buffer "*smart-scholar-cluster*"
-      (kill-region (point-min) (point-max))
-      (insert str))))
+    (let ((buffer (get-buffer-create "*smart-scholar-cluster*")))
+      (with-current-buffer buffer
+        (kill-region (point-min) (point-max))
+        (insert str))
+      (pop-to-buffer buffer))))
 
 (defun get-cite-id (line)
   (string-match "cite:\\([[:digit:]]+-[^-]+\\)*" line)
