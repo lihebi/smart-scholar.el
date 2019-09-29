@@ -130,3 +130,8 @@ webpages that is fine.
 The pdf cannot be mirrored: they are too large and has copyright
 concern.
 
+
+* TODO-List
+
+** TODO better loading granularity
+E.g. loading conf by year
