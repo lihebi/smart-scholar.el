@@ -39,7 +39,7 @@
 (defcustom smart-scholar-category-alist
   '(("AI" . ("NIPS" "ICML" "ACML" "AISTATS" "COLT"
              "IJCAI" "UAI" "AAAI" "JMLR" "ML" "ICLR"))
-    ("arXiv" . ("cs.AI" "cs.LG" "cs.CV"))
+    ("arXiv" . ("cs.AI" "cs.LG" "cs.CV" "stat.ML"))
     ("CV" . ("ICCV" "CVPR" "ECCV"))
     ("SE" . ("ASE" "PASTE" "FSE" "ICSE" "ISSTA" "MSR"))
     ("System" . ("OSDI" "SOSP" "KDD" "STOC" "VLDB" "ISCA"))
@@ -47,7 +47,7 @@
              "OOPSLA" "PLDI" "SIGPLAN" "POPL"
              "Haskell" "ICFP" "LFP"))
     ("NLP" . ("CL" "ACL" "NAACL" "EACL" "EMNLP"))
-    ("Robotics" . ("ICRA" "IROS" "TRO" "DAC" "ICCAD")))
+    ("Robotics" . ("ICRA" "IROS" "TRO" "DAC" "ICCAD" "ISPD")))
   "Conference by categories.  For easy loading."
   :group 'smart-scholar)
 
@@ -244,13 +244,16 @@
 ;; (setq url-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36")
 ;; (setq url-user-agent 'default)
 ;; seems acm is tolerate for emacs agent
+;; (download-acm-paper "https://dl.acm.org/ft_gateway.cfm?id=2677013&ftid=1522763&dwn=1" "a.pdf")
+;; (url-copy-file "https://dl.acm.org/doi/pdf/10.1145/1055137.1055182?download=true" "b.pdf")
 (defun download-acm-paper (url f)
   ;; "http://dl.acm.org/ft_gateway.cfm?id=2677013&ftid=1522763&dwn=1"
   (assert (string-prefix-p "https://dl.acm.org/ft_gateway.cfm" url))
   (url-retrieve url
                 (lambda (status)
                   (let ((real_url (plist-get status :redirect)))
-                    (assert (string-prefix-p "http://delivery.acm.org/" real_url))
+                    ;; FIXME it seems to be changed
+                    ;; (assert (string-prefix-p "http://delivery.acm.org/" real_url) t)
                     (url-copy-file real_url f)))))
 
 ;; (url-copy-file "https://arxiv.org/pdf/1409.0473.pdf" "test.pdf")
